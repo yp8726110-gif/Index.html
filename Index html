@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Garment Shop - Single File App</title>
+  <style>
+    :root {
+      --primary:#1d2b64;
+      --accent:#1abc9c;
+      --bg:#f4f4f4;
+      --card:#ffffff;
+      --danger:#e74c3c;
+    }
+    html,body { height:100%; margin:0; font-family: Arial, sans-serif; background:var(--bg); }
+    .app {
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .card {
+      background:var(--card);
+      width:360px;
+      max-width:95%;
+      border-radius:12px;
+      box-shadow:0 6px 24px rgba(0,0,0,0.15);
+      padding:22px;
+    }
+    header.appbar {
+      position:fixed;
+      top:0; left:0; right:0;
+      height:60px;
+      background:linear-gradient(90deg,#f8cdda,var(--primary));
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 18px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.12);
+    }
+    header.appbar h1 { margin:0; font-size:18px; color: #fff; letter-spacing:0.4px; }
+    header.appbar nav a {
+      color:white; text-decoration:none; margin-left:12px; font-weight:600;
+    }
+    .view { display:none; }
+    .view.active { display:block; }
+
+    h2 { text-align:center; color:var(--primary); margin-top:0; }
+    label { display:block; margin:10px 0 6px; font-weight:600; font-size:14px; }
+    input, textarea {
+      width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box;
+    }
+    .btn {
+      display:block; width:100%; padding:10px; margin-top:14px; border-radius:8px; border:none;
+      background:var(--primary); color:white; cursor:pointer; font-weight:700; font-size:15px;
+    }
+    .btn.secondary { background:var(--accent); color:white; }
+    .btn.danger { background:var(--danger); }
+    .row { display:flex; gap:10px; }
+    .muted { font-size:13px; color:#666; text-align:center; margin-top:12px; }
+
+    /* category / cards */
+    .categories { display:flex; gap:12px; justify-content:center; margin-top:20px; }
+    .cat { background:var(--card); padding:18px; border-radius:10px; width:100px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.08); cursor:pointer; }
+    .products { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; }
+    .product { background:var(--card); padding:12px; text-align:center; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+    .small { font-size:13px; color:#444; }
+    .success { color:green; font-weight:700; text-align:center; margin-top:8px; }
+
+    /* footer */
+    footer.smallbar { text-align:center; margin-top:14px; font-size:13px; color:#666; }
+
+    /* responsive */
+    @media (max-width:480px){
+      .products { grid-template-columns:repeat(2,1fr); }
+      .card { width:92%; padding:16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="appbar">
+    <h1>Garment Shop</h1>
+    <nav>
+      <a href="#" data-nav="home">Home</a>
+      <a href="#" data-nav="contact">Contact</a>
+    </nav>
+  </header>
+
+  <div class="app">
+    <div class="card">
+
+      <!-- LOGIN VIEW -->
+      <section id="view-login" class="view active">
+        <h2>Garment Shop Login</h2>
+        <div>
+          <label for="login-username">Username / Email</label>
+          <input id="login-username" type="text" placeholder="Enter username or email" />
+
+          <label for="login-password">Password</label>
+          <input id="login-password" type="password" placeholder="Enter password" />
+
+          <button class="btn" id="btn-login">Login</button>
+          <button class="btn secondary" id="btn-to-register">Register</button>
+
+          <p class="muted">Don’t have an account? Click Register.</p>
+        </div>
+      </section>
+
+      <!-- REGISTRATION VIEW -->
+      <section id="view-register" class="view">
+        <h2>User Registration</h2>
+        <form id="form-register">
+          <label for="reg-name">Full Name</label>
+          <input id="reg-name" name="name" type="text" required />
+
+          <label for="reg-email">Email</label>
+          <input id="reg-email" name="email" type="email" required />
+
+          <label for="reg-phone">Phone</label>
+          <input id="reg-phone" name="phone" type="text" required />
+
+          <label for="reg-password">Password</label>
+          <input id="reg-password" name="password" type="password" required />
+
+          <label for="reg-address">Address</label>
+          <input id="reg-address" name="address" type="text" required />
+
+          <button type="submit" class="btn secondary">Register</button>
+          <button type="button" class="btn danger" id="btn-cancel-register">Cancel</button>
+
+          <p class="muted">Already registered? <a href="#" id="link-to-login">Login</a></p>
+        </form>
+      </section>
+
+      <!-- CATEGORY VIEW -->
+      <section id="view-category" class="view">
+        <h2>Select Category</h2>
+        <div class="categories">
+          <div class="cat" data-cat="Men">Men Wear</div>
+          <div class="cat" data-cat="Women">Women Wear</div>
+          <div class="cat" data-cat="Kids">Kids Wear</div>
+        </div>
+
+        <div class="muted">Select a category to browse products.</div>
+        <div style="margin-top:12px;">
+          <button class="btn" id="btn-view-cart" style="display:none">View Cart (0)</button>
+          <button class="btn secondary" id="btn-logout">Logout</button>
+        </div>
+      </section>
+
+      <!-- SELLING / PRODUCTS VIEW -->
+      <section id="view-selling" class="view">
+        <h2 id="selling-title">Products</h2>
+        <div class="products" id="products-list">
+          <!-- product cards injected by JS -->
+        </div>
+
+        <div style="margin-top:12px;">
+          <button class="btn secondary" id="btn-back-to-cats">Back to Categories</button>
+          <button class="btn" id="btn-go-contact">Contact Us</button>
+        </div>
+
+        <div class="success" id="added-msg" style="display:none">Item added to cart ✔</div>
+      </section>
+
+      <!-- CONTACT VIEW -->
+      <section id="view-contact" class="view">
+        <h2>Contact Us</h2>
+
+        <label for="contact-name">Name</label>
+        <input id="contact-name" type="text" placeholder="तुमचे नाव" />
+
+        <label for="contact-email">Email</label>
+        <input id="contact-email" type="email" placeholder="तुमचा ईमेल" />
+
+        <label for="contact-message">Message</label>
+        <textarea id="contact-message" rows="4" placeholder="तुमचा संदेश"></textarea>
+
+        <button class="btn" id="btn-send-contact">Send</button>
+        <button class="btn danger" id="btn-contact-back">Back</button>
+
+        <p class="muted" style="margin-top:8px">आम्हाला तुमचा फीडबॅक हवा आहे — धन्यवाद!</p>
+      </section>
+
+      <footer class="smallbar">© 2025 Garment Shop</footer>
+    </div>
+  </div>
+
+  <script>
+    // Simple single-file app logic
+    const views = {
+      login: document.getElementById('view-login'),
+      register: document.getElementById('view-register'),
+      category: document.getElementById('view-category'),
+      selling: document.getElementById('view-selling'),
+      contact: document.getElementById('view-contact')
+    };
+
+    function show(viewName){
+      for(const v in views) views[v].classList.remove('active');
+      views[viewName].classList.add('active');
+      window.scrollTo(0,0);
+    }
+
+    // Links / nav
+    document.querySelectorAll('a[data-nav]').forEach(a=>{
+      a.addEventListener('click', e=>{
+        e.preventDefault();
+        const dest = a.getAttribute('data-nav');
+        if(dest === 'contact') show('contact');
+        else show('login');
+      });
+    });
+
+    // register <-> login navigation
+    document.getElementById('btn-to-register').addEventListener('click', ()=> show('register'));
+    document.getElementById('btn-cancel-register').addEventListener('click', ()=> show('login'));
+    document.getElementById('link-to-login').addEventListener('click', (e)=>{ e.preventDefault(); show('login'); });
+
+    // fake "database" in localStorage
+    const STORAGE_KEY = 'garment_users_v1';
+    function loadUsers(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }catch(e){ return []; } }
+    function saveUser(user){
+      const users = loadUsers();
+      users.push(user);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+    }
+
+    // Register form submit
+    document.getElementById('form-register').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const password = document.getElementById('reg-password').value;
+      const address = document.getElementById('reg-address').value.trim();
+
+      if(!name || !email || !phone || !password || !address){
+        alert('कृपया सगळे फील्ड भरा.');
+        return;
+      }
+      // basic email check
+      if(!/^\S+@\S+\.\S+$/.test(email)){
+        alert('कृपया वैध ईमेल द्या.');
+        return;
+      }
+
+      saveUser({name,email,phone,password,address,created: new Date().toISOString()});
+      alert('Registration successful! कृपया login करा.');
+      // clear form
+      e.target.reset();
+      show('login');
+    });
+
+    // Login (very simple auth)
+    document.getElementById('btn-login').addEventListener('click', ()=>{
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      if(!username || !password){ alert('कृपया username आणि password भरा.'); return; }
+
+      const users = loadUsers();
+      const found = users.find(u => (u.email === username || u.name === username) && u.password === password);
+      if(found){
+        // store current session
+        localStorage.setItem('garment_current_user', JSON.stringify({name:found.name,email:found.email}));
+        show('category');
+      } else {
+        alert('User न मिळाला किंवा password चुकीचा. Register करा किंवा credentials तपासा.');
+      }
+    });
+
+    // Logout / session clear
+    document.getElementById('btn-logout').addEventListener('click', ()=>{
+      localStorage.removeItem('garment_current_user');
+      show('login');
+    });
+
+    // Categories -> Selling
+    document.querySelectorAll('.cat').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const cat = el.dataset.cat || 'Products';
+        openSelling(cat);
+      });
+    });
+
+    const productsDB = {
+      Men: [
+        {name:'T-Shirt', price:499},
+        {name:'Jeans', price:1299},
+        {name:'Shirt', price:899}
+      ],
+      Women: [
+        {name:'Women Kurta', price:699},
+        {name:'Dress', price:1499},
+        {name:'Skirt', price:799}
+      ],
+      Kids: [
+        {name:'Kids T-Shirt', price:299},
+        {name:'Kids Shorts', price:399},
+        {name:'Kids Dress', price:599}
+      ]
+    };
+
+    function openSelling(category){
+      document.getElementById('selling-title').textContent = category + ' - Products';
+      const list = document.getElementById('products-list');
+      list.innerHTML = '';
+      const items = productsDB[category] || [];
+      items.forEach((p, idx)=>{
+        const card = document.createElement('div');
+        card.className = 'product';
+        card.innerHTML = `<h3 style="margin:6px 0">${p.name}</h3>
+                          <p class="small">₹${p.price}</p>
+                          <button class="btn" data-idx="${idx}" data-cat="${category}">Add to Cart</button>`;
+        list.appendChild(card);
+      });
+      show('selling');
+    }
+
+    // Add to cart (simple localStorage cart)
+    document.getElementById('products-list').addEventListener('click', (e)=>{
+      if(e.target.tagName === 'BUTTON'){
+        const cat = e.target.dataset.cat;
+        const idx = parseInt(e.target.dataset.idx,10);
+        const item = productsDB[cat][idx];
+        const cart = JSON.parse(localStorage.getItem('garment_cart') || '[]');
+        cart.push({...item, category:cat, added: new Date().toISOString()});
+        localStorage.setItem('garment_cart', JSON.stringify(cart));
+        const msg = document.getElementById('added-msg');
+        msg.style.display = 'block';
+        setTimeout(()=> msg.style.display = 'none', 1200);
+      }
+    });
+
+    // Back to categories
+    document.getElementById('btn-back-to-cats').addEventListener('click', ()=> show('category'));
+
+    // Contact navigation
+    document.getElementById('btn-go-contact').addEventListener('click', ()=> show('contact'));
+    document.getElementById('btn-contact-back').addEventListener('click', ()=> show('selling'));
+
+    // Header contact link
+    document.querySelectorAll('nav a').forEach(a=>{
+      a.addEventListener('click', (e)=> {
+        // handled above by data-nav; prevent default just in case
+        e.preventDefault();
+      });
+    });
+
+    // Contact send
+    document.getElementById('btn-send-contact').addEventListener('click', ()=>{
+      const name = document.getElementById('contact-name').value.trim();
+      const email = document.getElementById('contact-email').value.trim();
+      const message = document.getElementById('contact-message').value.trim();
+
+      if(!name || !email || !message){ alert('कृपया सगळे फील्ड भरा.'); return; }
+      if(!/^\S+@\S+\.\S+$/.test(email)){ alert('कृपया वैध ईमेल द्या.'); return; }
+
+      // For demo: just save contact messages to localStorage
+      const msgs = JSON.parse(localStorage.getItem('garment_messages') || '[]');
+      msgs.push({name,email,message,when:new Date().toISOString()});
+      localStorage.setItem('garment_messages', JSON.stringify(msgs));
+
+      alert('तुमचा संदेश पाठविला गेला. धन्यवाद!');
+      document.getElementById('contact-name').value = '';
+      document.getElementById('contact-email').value = '';
+      document.getElementById('contact-message').value = '';
+      show('category');
+    });
+
+    // on load: if session exists, go to category
+    window.addEventListener('load', ()=>{
+      const session = localStorage.getItem('garment_current_user');
+      if(session) show('category');
+    });
+
+    // small UX: nav top-left home click returns to login
+    document.querySelector('header h1').addEventListener('click', ()=> show('login'));
+
+  </script>
+</body>
+</html>
